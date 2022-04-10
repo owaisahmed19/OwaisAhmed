@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
         alignItems:'center',
     },
     txt:{
-        paddingTop:60,
-        fontSize:30,
-        fontWeight:'bold',
+        paddingTop:30,
+        fontSize:15,
+        
     },
     input:{
      
