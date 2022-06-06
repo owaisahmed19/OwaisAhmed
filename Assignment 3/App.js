@@ -1,10 +1,11 @@
-import React, { useState,useEffect } from 'react';
+import * as React from "react";
+import { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StyleSheet,
   Image, Dimensions,
   Touchable, Pressable,TouchableOpacity,
-  navigation,
+  navigation,ImageBackground,
   Button,
   Text,
   View
@@ -14,41 +15,33 @@ import CalendarPicker from 'react-native-calendar-picker';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { createStackNavigator } from '@react-navigation/stack';
 import { BarChart } from "react-native-chart-kit";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import moment from 'moment';
+
 
 function Home({ navigation }) {
 
-  const [date, setdate] = useState(new Date());
- 
-  const [selectedStartDate, setSelectedStartDate] = useState(null);
-  const [selectedEndDate, setSelectedEndDate] = useState(null);
-  const [fajar, setFajar] = useState("");
-  const [zuhar, setzuhar] = useState("");
+
+  
+
+  const [selectedDate, setSelectedDate] = useState();
+  const [text, settext] = useState(moment(selectedDate).format("YYYY/MM/DD"));
+  const [fajar, setfajar] = useState("");
+  const [zohar, setzohar] = useState("");
   const [asar, setasar] = useState("");
-  const [maghrib, setmaghrib] = useState("");
-  const [isha, setisha] = useState("");
+  const [mag, setmag] = useState("");
+  const [esha, setesha] = useState("");
 
-  const onDateChange = (date, type) => {
+  
+  const onDateChange = (date) => {
 
-   
-    //function to handle the date change
-    if (type === 'END_DATE') {
-      setSelectedEndDate(date);
-    } else {
-      setSelectedEndDate(null);
-      setSelectedStartDate(date);
-    }
-    setFajar(null);
-    setzuhar(null);
-    setasar(null);
-    setmaghrib(null);
-    setisha(null);
+      setSelectedDate(date);
+      settext(moment(date).format("YYYY/MM/DD"))
     
-
   };
 
-
   const storeFajar = async (val) => {
-    setFajar(val);
+    setfajar(val);
     try {
       await AsyncStorage.setItem(text + "f", val);
     } catch (e) {
@@ -56,7 +49,7 @@ function Home({ navigation }) {
     }
   };
   const storeZuhar = async (val) => {
-    setzuhar(val);
+    setzohar(val);
     try {
       await AsyncStorage.setItem(text + "z", val);
     } catch (e) {
@@ -72,7 +65,7 @@ function Home({ navigation }) {
     }
   };
   const storeMaghrib = async (val) => {
-    setmaghrib(val);
+    setmag(val);
     try {
       await AsyncStorage.setItem(text + "m", val);
     } catch (e) {
@@ -80,7 +73,7 @@ function Home({ navigation }) {
     }
   };
   const storeIsha = async (val) => {
-    setisha(val);
+   setesha(val);
     try {
       await AsyncStorage.setItem(text + "i", val);
     } catch (e) {
@@ -96,26 +89,30 @@ function Home({ navigation }) {
       const maghrib = await AsyncStorage.getItem(text + "m");
       const isha = await AsyncStorage.getItem(text + "i");
 
-      setFajar(fajar);
-      setzuhar(zuhar);
+      setfajar(fajar);
+      setzohar(zuhar);
       setasar(asar);
-      setmaghrib(maghrib);
-      setisha(isha);
-      console.log(fajar)
+      setmag(maghrib);
+      setesha(isha);
     } catch (e) {
       // error reading value
     }
   };
-
   useEffect(() => {
     getData();
   });
 
+
   return (
     <View style={styles.container}>
+  <ImageBackground 
+            style={styles.container} 
+            source={require("./assets/praye.jfif")}
+          >
+   
 
       <Text style={styles.titleStyle}>
-        Salah App
+        Salah Nimaz App
       </Text>
       <CalendarPicker
         startFromMonday={true}
@@ -124,33 +121,26 @@ function Home({ navigation }) {
 
         minDate={new Date(2018, 1, 1)}
         maxDate={new Date()}
-        previousTitle="Previous"
+        previousTitle="<<"
+        nextTitle=">>"
+        
         todayBackgroundColor="#e6ffe6"
         selectedDayColor="#66ff33"
         selectedDayTextColor="#000000"
         width={600}
 
-        value={date}
         textStyle={{
           fontFamily: 'Cochin',
-          color: 'black',
+          color: 'white',
           alignSelf: 'center',
 
         }}
 
+       
         onDateChange={onDateChange}
 
       />
-      <View style={styles.textStyle}>
-        <Text style={styles.textStyle}>
-          Selected Start Date :
-        </Text>
-        <Text style={styles.textStyle}>
-          {selectedStartDate ? selectedStartDate.toString() : ''}
-        </Text>
-       
-
-      </View>
+  
       <View style={styles.pray}>
 
         <View style={styles.prop} >
@@ -164,11 +154,11 @@ function Home({ navigation }) {
 
             selected={fajar}
             containerStyle={{ flexDirection: "row" }}
-            onSelected={(value) => storeFajar(value)}
-            radioBackground="blue">
-            <RadioButtonItem value="fajarof" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
+            onSelected={(val) => storeFajar(val)}
+            radioBackground="white">
+            <RadioButtonItem value="offered" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
             } />
-            <RadioButtonItem value="fajarnotof" label={
+            <RadioButtonItem value="notOffered" label={
               <Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Not Offered</Text>
             } />
           </RadioButtonGroup>
@@ -183,13 +173,13 @@ function Home({ navigation }) {
 
           <RadioButtonGroup
 
-            selected={zuhar}
+            selected={zohar}
             containerStyle={{ flexDirection: "row" }}
-            onSelected={(value) => storeZuhar(value)}
-            radioBackground="blue">
-            <RadioButtonItem value="zoharof" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
+            onSelected={(val) => storeZuhar(val)}
+            radioBackground="white">
+            <RadioButtonItem value="offered" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
             } />
-            <RadioButtonItem value="zoharnotof" label={
+            <RadioButtonItem value="notOffered" label={
               <Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Not Offered</Text>
             } />
           </RadioButtonGroup>
@@ -206,11 +196,11 @@ function Home({ navigation }) {
 
             selected={asar}
             containerStyle={{ flexDirection: "row" }}
-            onSelected={(value) => storeAsar(value)}
-            radioBackground="blue">
-            <RadioButtonItem value="asarof" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
+            onSelected={(val) => storeAsar(val)}
+            radioBackground="white">
+            <RadioButtonItem value="offered" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
             } />
-            <RadioButtonItem value="asarnotof" label={
+            <RadioButtonItem value="notOffered" label={
               <Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Not Offered</Text>
             } />
           </RadioButtonGroup>
@@ -225,13 +215,13 @@ function Home({ navigation }) {
 
           <RadioButtonGroup
 
-            selected={maghrib}
+            selected={mag}
             containerStyle={{ flexDirection: "row" }}
-            onSelected={(value) => storeMaghrib(value)}
-            radioBackground="blue">
-            <RadioButtonItem value="magof" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
+            onSelected={(val) => storeMaghrib(val)}
+            radioBackground="white">
+            <RadioButtonItem value="offered" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
             } />
-            <RadioButtonItem value="magnotof" label={
+            <RadioButtonItem value="notOffered" label={
               <Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Not Offered</Text>
             } />
           </RadioButtonGroup>
@@ -246,13 +236,13 @@ function Home({ navigation }) {
 
           <RadioButtonGroup
 
-            selected={isha}
+            selected={esha}
             containerStyle={{ flexDirection: "row" }}
-            onSelected={(value) => storeIsha(value)}
-            radioBackground="blue">
-            <RadioButtonItem value="eshaof" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
+            onSelected={(val) => storeIsha(val)}
+            radioBackground="white">
+            <RadioButtonItem value="offered" label={<Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Offered</Text>
             } />
-            <RadioButtonItem value="eshanotof" label={
+            <RadioButtonItem value="notOffered" label={
               <Text style={{ color: "black", fontSize: 20, fontWeight: 'bold', marginLeft: 15, marginRight: 15 }}>Not Offered</Text>
             } />
           </RadioButtonGroup>
@@ -265,104 +255,347 @@ function Home({ navigation }) {
         Previous Record
       </Text>
 
-      <View style={{ alignItems: 'center', justifyContent: 'center', flexDirection: 'row', marginBottom: 100 }}>
-
-
+      <View style={{ alignItems: 'center', justifyContent: 'center', flexDirection: 'column', marginBottom: 100 }}>
         <Pressable
-          onPress={() => navigation.navigate('LAST 7 DAYS')}
-          style={{ backgroundColor: 'orange', padding: 10, marginTop: 10, marginRight: 20, borderRadius: 20 }}
+          onPress={() => navigation.navigate('WEEKLY')}
+          style={styles.buttons}
         >
-          <Text style={styles.textsty}>LAST 7 DAYS</Text>
+          <Text style={styles.textsty}>WEEKLY</Text>
         </Pressable>
         <Pressable
           onPress={() => navigation.navigate('MONTHLY')}
-          style={{ backgroundColor: 'orange', padding: 10, marginTop: 10, marginRight: 20, borderRadius: 20 }}
+          style={styles.buttons}
         >
           <Text style={styles.textsty}>MONTHLY</Text>
         </Pressable>
         <Pressable
-          onPress={() => navigation.navigate('YEARLY')}
-          style={{ backgroundColor: 'orange', padding: 10, marginTop: 10, marginRight: 20, borderRadius: 20 }}
+          onPress={() => navigation.navigate('CUSTOM')}
+          style={styles.buttons}
         >
-          <Text style={styles.textsty}>YEARLY</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate('DATE RANGE')}
-          style={{ backgroundColor: 'orange', padding: 10, marginTop: 10, marginRight: 20, borderRadius: 20 }}
-        >
-          <Text style={styles.textsty}>DATE RANGE</Text>
+          <Text style={styles.textsty}>CUSTOM</Text>
         </Pressable>
       </View>
+      </ImageBackground>
     </View>
   );
 }
 
-function Days({ navigation }) {
-  const [dataFromDb, setdataFromDb] = useState(TempData);
-  const [TotalNimazs, setTotalNimazs] = useState(0);
-  const [OfferedNimazs, setOfferedNimazs] = useState(0);
-  const [DataRangeOptionShow, setDataRangeOptionShow] = useState(true);
-  const getCurrentDate = (date) => {
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
-    return year + "-0" + month + "-" + date; //format: dd-mm-yyyy;
-  };
-  const fetchDataofWeek = async (setData) => {
-    const week = [];
-    for (var i = 6; i >= 0; i--) {
-      var date = new Date();
-      var temp = null;
-      temp = getCurrentDate(date.getDate() - i);
-      week.push(temp);
-    }
-    var fajarcount = 0;
-    var zuharcount = 0;
-    var asrcount = 0;
-    var maghribcount = 0;
-    var eshacount = 0;
-    for (var i = 0; i < 7; i++) {
-      try {
-        const jsonValue = await AsyncStorage.getItem(week[i]);
-        if (jsonValue != null) {
-          const parseValue = JSON.parse(jsonValue);
-          if (parseValue[0]["Fajar"]) {
-            fajarcount++;
-          }
-          if (parseValue[0]["Zuhar"]) {
-            zuharcount++;
-          }
-          if (parseValue[0]["Asr"]) {
-            asrcount++;
-          }
-          if (parseValue[0]["Maghrib"]) {
-            maghribcount++;
-          }
-          if (parseValue[0]["Esha"]) {
-            eshacount++;
-          }
-        }
-        // console.log("You Fetch the data with date ",week[i]," with data ",jsonValue);
-      } catch (e) {
-        console.log(e);
+function Weekly({ navigation }) {
+  let defaultValues = [1, 1, 1, 1, 1];
+  const [prayerRecord, setprayerRecord] = useState(defaultValues);
+  const [curDate, setcurDate] = useState(new Date());
+  const [weeklyCount, setweeklyCount] = useState(0);
+
+  let fajarCount = 0;
+  let zuharCount = 0;
+  let asarCount = 0;
+  let maghribCount = 0;
+  let ishaCount = 0;
+
+  const getWeeklyRecord = async () => {
+    try {
+      //day 1
+      let d;
+      let m;
+      if (moment(curDate).format("DD") - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = (moment(curDate).format("DD")) - 1;
+        m = moment(curDate).format("MM");
       }
+      console.log(curDate.getFullYear() + "/" + m + "/" + d + "i")
+      const fajar1 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar1 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar1 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib1 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha1 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar1 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar1 === "offered") {
+        zuharCount++;
+      }
+      if (asar1 === "offered") {
+        asarCount++;
+      }
+      if (maghrib1 === "offered") {
+        maghribCount++;
+      }
+      if (isha1 === "offered") {
+        ishaCount++;
+      }
+      //day 2
+      if (d - 1 === 0 ) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar2 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar2 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar2 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib2 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha2 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar2 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar2 === "offered") {
+        zuharCount++;
+      }
+      if (asar2 === "offered") {
+        asarCount++;
+      }
+      if (maghrib2 === "offered") {
+        maghribCount++;
+      }
+      if (isha2 === "offered") {
+        ishaCount++;
+      }
+      //day 3
+      if (d - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar3 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar3 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar3 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib3 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha3 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar3 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar3 === "offered") {
+        zuharCount++;
+      }
+      if (asar3 === "offered") {
+        asarCount++;
+      }
+      if (maghrib3 === "offered") {
+        maghribCount++;
+      }
+      if (isha3 === "offered") {
+        ishaCount++;
+      }
+      //day 4
+      if (d - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar4 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar4 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar4 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib4 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha4 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar4 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar4 === "offered") {
+        zuharCount++;
+      }
+      if (asar4 === "offered") {
+        asarCount++;
+      }
+      if (maghrib4 === "offered") {
+        maghribCount++;
+      }
+      if (isha4 === "offered") {
+        ishaCount++;
+      }
+      //day 5
+      if (d - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar5 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar5 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar5 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib5 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha5 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar5 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar5 === "offered") {
+        zuharCount++;
+      }
+      if (asar5 === "offered") {
+        asarCount++;
+      }
+      if (maghrib5 === "offered") {
+        maghribCount++;
+      }
+      if (isha5 === "offered") {
+        ishaCount++;
+      }
+      //day 6
+      if (d - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar6 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar6 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar6 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib6 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha6 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar6 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar6 === "offered") {
+        zuharCount++;
+      }
+      if (asar6 === "offered") {
+        asarCount++;
+      }
+      if (maghrib6 === "offered") {
+        maghribCount++;
+      }
+      if (isha6 === "offered") {
+        ishaCount++;
+      }
+      console.log(curDate.getFullYear() + "/" + m + "/" + d + "i")
+      console.log(isha6)
+      //day 7
+      if (d - 1 === 0) {
+        d = 31;
+        m = moment(curDate).format("MM")-1;
+      } else {
+        d = d - 1;
+        m = m;
+      }
+      const fajar7 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "f"
+      );
+      const zuhar7 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "z"
+      );
+      const asar7 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "a"
+      );
+      const maghrib7 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "m"
+      );
+      const isha7 = await AsyncStorage.getItem(
+        curDate.getFullYear() + "/" + m + "/" + d + "i"
+      );
+      if (fajar7 === "offered") {
+        fajarCount++;
+      }
+      if (zuhar7 === "offered") {
+        zuharCount++;
+      }
+      if (asar7 === "offered") {
+        asarCount++;
+      }
+      if (maghrib7 === "offered") {
+        maghribCount++;
+      }
+      if (isha7 === "offered") {
+        ishaCount++;
+      }
+    } catch (e) {
+      console.log(e);
     }
-    setOfferedNimazs(
-      fajarcount + zuharcount + asrcount + maghribcount + eshacount
+    setweeklyCount(
+      fajarCount + zuharCount + asarCount + maghribCount + ishaCount
     );
-    const data = [fajarcount, zuharcount, asrcount, maghribcount, eshacount];
-    setdataFromDb(data);
-    // console.log("Total: ",fajarcount," - ",zuharcount," - ",asrcount," - ",maghribcount," - ",eshacount);
+    if (weeklyCount !== 0) {
+      setprayerRecord([
+        fajarCount,
+        zuharCount,
+        asarCount,
+        maghribCount,
+        ishaCount,
+      ]);
+    }
+    console.log(prayerRecord);
   };
+
+  useEffect(() => {
+    getWeeklyRecord();
+  },[]);
+
+
+
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-
-
-      
       <BarChart
         data={{
 
           labels: ['FAJAR', 'ZOHAR', 'ASSAR', 'MAGRIB', 'ESHA'],
-          datasets: [{ data: [6, 3, 7, 4, 7] }],
+          datasets: [{ data:  prayerRecord}],
 
         }}
         width={800}
@@ -389,62 +622,12 @@ function Days({ navigation }) {
 
 
       />
-
-      
     </View>
 
   );
 }
 
 function Month({ navigation }) {
-
-
-  const fetchDataofMonth = async (setData) => {
-    const week = [];
-    for (var i = 29; i >= 0; i--) {
-      var date = new Date();
-      var temp = null;
-      temp = getCurrentDate(date.getDate() - i);
-      week.push(temp);
-    }
-    var fajarcount = 0;
-    var zuharcount = 0;
-    var asrcount = 0;
-    var maghribcount = 0;
-    var eshacount = 0;
-    for (var i = 0; i < 30; i++) {
-      try {
-        const jsonValue = await AsyncStorage.getItem(week[i]);
-        if (jsonValue != null) {
-          const parseValue = JSON.parse(jsonValue);
-          if (parseValue[0]["Fajar"]) {
-            fajarcount++;
-          }
-          if (parseValue[0]["Zuhar"]) {
-            zuharcount++;
-          }
-          if (parseValue[0]["Asr"]) {
-            asrcount++;
-          }
-          if (parseValue[0]["Maghrib"]) {
-            maghribcount++;
-          }
-          if (parseValue[0]["Esha"]) {
-            eshacount++;
-          }
-        }
-        // console.log("You Fetch the data with date ",week[i]," with data ",jsonValue);
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    setOfferedNimazs(
-      fajarcount + zuharcount + asrcount + maghribcount + eshacount
-    );
-    const data = [fajarcount, zuharcount, asrcount, maghribcount, eshacount];
-    setdataFromDb(data);
-    // console.log("Total: ",fajarcount," - ",zuharcount," - ",asrcount," - ",maghribcount," - ",eshacount);
-  };
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 
@@ -519,7 +702,7 @@ function Date_range() {
     <View>
     <View style={styles.custom}>
     <View style={{marginRight:300}}>
-      <TouchableOpacity style={{backgroundColor:'orange',height:50, padding: 10,borderRadius:20,alignSelf:'center'}} onPress={(val) => setVisible(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Pick Start Date</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.button1} onPress={(val) => setVisible(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Pick Start Date</Text></TouchableOpacity>
        {visible && (<CalendarPicker
         startFromMonday={true}
 
@@ -545,15 +728,16 @@ function Date_range() {
       
       <View style={styles.textStyle}>
         <Text style={styles.textStyle}>
-          Selected Start Date :
+          Selected Date :
         </Text>
         <Text style={styles.textStyle}>
           {selectedStartDate1 ? selectedStartDate1.toString() : ''}
         </Text>
+        
       </View>
     </View>  
     <View >
-    <TouchableOpacity style={{backgroundColor:'orange',height:50, padding: 10,borderRadius:20,alignSelf:'center'}} onPress={(val) => setVisible2(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Pick End Date</Text></TouchableOpacity>
+    <TouchableOpacity style={styles.button1} onPress={(val) => setVisible2(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Pick End Date</Text></TouchableOpacity>
        {visible2 && (<CalendarPicker
         startFromMonday={true}
 
@@ -588,7 +772,7 @@ function Date_range() {
     </View>
     </View>
     <View style={{alignItems:'center'}}>
-    <TouchableOpacity style={{backgroundColor:'orange',height:50, padding: 10,borderRadius:20,alignSelf:'center',marginTop:60,marginBottom:60}} onPress={(val) => setVisible_chart(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Show Chart</Text></TouchableOpacity>
+    <TouchableOpacity style={styles.button1} onPress={(val) => setVisible_chart(val)}> <Text style={{justifyContent:'center', fontSize: 20,fontWeight:'bold'}} >Show Chart</Text></TouchableOpacity>
     {visible_chart && (
       <BarChart
         data={{
@@ -626,44 +810,7 @@ function Date_range() {
     </View>
   );
 }
-function Year() {
- 
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <BarChart
-      data={{
 
-        labels: ['2019', '2020', '2021', '2022'],
-        datasets: [{ data: [1200, 1544, 1800, 1300] }],
-
-      }}
-      width={800}
-      height={450}
-      barColor="plum"
-      chartConfig={{
-        barPercentage: 1.5,
-        barRadius: 5,
-        propsForLabels: {
-          fontSize: '10',
-        },
-        backgroundColor: 'white',
-        backgroundGradientFrom: '#008080',
-        backgroundGradientTo: 'purple',
-        decimalPlaces: false,
-        color: (opacity = 255) => '#ECEFF1',
-        style: {
-          borderRadius: 20,
-        },
-      }}
-      fromZero={true}
-      showValuesOnTopOfBars={true}
-
-
-
-    />
-  </View>
-  );
-}
 
 const Stack = createStackNavigator();
 
@@ -674,10 +821,9 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="HOME" component={Home} />
-        <Stack.Screen name="LAST 7 DAYS" component={Days} />
+        <Stack.Screen name="WEEKLY" component={Weekly} />
         <Stack.Screen name="MONTHLY" component={Month} />
-        <Stack.Screen name="YEARLY" component={Year} />
-        <Stack.Screen name="DATE RANGE" component={Date_range} />
+        <Stack.Screen name="CUSTOM" component={Date_range} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -705,8 +851,8 @@ justifyContent:'center'
     fontSize: 20,
     marginBottom:20
 
-
   },
+ 
   checkbox: {
     alignSelf: 'center',
     height: 20,
@@ -717,13 +863,25 @@ justifyContent:'center'
     textAlign: 'center',
     fontSize: 30,
     alignItems: 'center',
-    marginBottom: 40,
-    marginTop: 20,
+    marginBottom: 10,
+    marginTop: 10,
     fontWeight: 'bold',
-    color: 'blue'
+    color: '#00f0f0'
+  },
+  buttons:{
+    backgroundColor: '#4682b4', 
+    padding: 10,
+    marginTop: 15,
+    marginRight: 20,
+    borderRadius: 20 ,
+    width:400,
+  
+    height:50,
+    textAlign:"center"
   },
   pray: {
-    height: 500,
+   
+    height: 460,
     width: 500,
     alignItems: 'center',
 
@@ -736,7 +894,7 @@ justifyContent:'center'
     alignItems: 'center',
     marginTop: 10,
     flexDirection: 'row',
-    backgroundColor: "#f8f8ff",
+    backgroundColor: "#00b3b3",
     borderRadius: 20
   },
   pic: {
@@ -766,6 +924,18 @@ justifyContent:'center'
   textsty: {
     fontSize: 20,
     fontWeight: 'bold'
+  }
+  ,
+  button1:{
+    backgroundColor: '#4682b4', 
+    padding: 10,
+    marginTop: 15,
+    marginRight: 20,
+    borderRadius: 20 ,
+    width:200,
+  
+    height:50,
+    textAlign:"center"
   }
 
 });
